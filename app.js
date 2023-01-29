@@ -24,7 +24,7 @@ app.get("/login", (req, res)=>{
 });
 
 app.post("/register", (req, res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     Credential.insertMany([req.body], (err)=>{
         if(err)
             console.log(err);
@@ -32,6 +32,16 @@ app.post("/register", (req, res)=>{
             res.render("secrets");
     });
 });
+app.post("/login", (req, res)=>{
+    Credential.findOne(req.body, (err, data)=>{
+        if(data)
+            res.render("secrets");
+        else if(err)
+            console.log(err);
+        else
+            console.log("not found");
+    })
+})
 
 app.listen(3000, ()=>{
     console.log("listening 3000");
