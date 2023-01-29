@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1:27017/secretsDB", { useNewUrlParser: true });
-const credentialSchema = new mongoose.Schema({ email : String, password : String });
+const credentialSchema = new mongoose.Schema({ username : String, password : String });
 const Credential = mongoose.model("credential", credentialSchema);
 
 app.get("/", (req, res)=>{
@@ -21,6 +21,16 @@ app.get("/register", (req, res)=>{
 });
 app.get("/login", (req, res)=>{
     res.render("login");
+});
+
+app.post("/register", (req, res)=>{
+    console.log(req.body);
+    Credential.insertMany([req.body], (err)=>{
+        if(err)
+            console.log(err);
+        else
+            res.render("secrets");
+    });
 });
 
 app.listen(3000, ()=>{
