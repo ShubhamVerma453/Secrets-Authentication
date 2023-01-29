@@ -1,7 +1,8 @@
 const express = require("express");
-const ejs = require("ejs")
+const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
 const app = express();
 app.use(express.static("public"));
@@ -11,6 +12,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1:27017/secretsDB", { useNewUrlParser: true });
 const credentialSchema = new mongoose.Schema({ username : String, password : String });
+let secret = "thisIsASecretKey";
+credentialSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 const Credential = mongoose.model("credential", credentialSchema);
 
 app.get("/", (req, res)=>{
@@ -25,23 +28,27 @@ app.get("/login", (req, res)=>{
 
 app.post("/register", (req, res)=>{
     // console.log(req.body);
-    Credential.insertMany([req.body], (err)=>{
+    const user = new Credential(req.body);
+    user.save(err => {
         if(err)
             console.log(err);
-        else
+        else{
             res.render("secrets");
+        }
     });
 });
 app.post("/login", (req, res)=>{
-    Credential.findOne(req.body, (err, data)=>{
-        if(data)
+    Credential.findOne({username : req.body.username}, (err, data)=>{
+        if(data.password == req.body.password){
+            // console.log(data);
             res.render("secrets");
+        }
         else if(err)
             console.log(err);
         else
             console.log("not found");
-    })
-})
+    });
+});
 
 app.listen(3000, ()=>{
     console.log("listening 3000");
