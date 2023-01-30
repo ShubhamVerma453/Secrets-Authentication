@@ -42,10 +42,18 @@ app.get("/secret", (req, res)=>{
         res.render("secrets");
     else 
         res.redirect("/");
-})
+});
+app.get("/logout", (req, res)=>{
+    req.logOut((err)=>{
+        if(err){
+            console.log(err);
+        } else {
+            res.redirect("/");
+        }
+    });
+});
 
 app.post("/register", (req, res)=>{
-    // console.log(req.body);
     Credential.register({username : req.body.username}, req.body.password, (err, cred)=>{
         if(err){
             console.log(err);
@@ -53,12 +61,22 @@ app.post("/register", (req, res)=>{
         } else {
             passpost.authenticate("local")(req, res, ()=>{
                 res.redirect("/secret");
-            })
+            });
         }
-    })
+    });
     
 });
 app.post("/login", (req, res)=>{
+    const cred = new Credential(req.body);
+    req.logIn(cred, (err)=>{
+        if(err){
+            console.log(err);
+        } else {
+            passpost.authenticate("local")(req, res, ()=>{
+                res.redirect("/secret");
+            });
+        }
+    });
     
 });
 
