@@ -37,9 +37,25 @@ app.get("/register", (req, res)=>{
 app.get("/login", (req, res)=>{
     res.render("login");
 });
+app.get("/secret", (req, res)=>{
+    if(req.isAuthenticated())
+        res.render("secrets");
+    else 
+        res.redirect("/");
+})
 
 app.post("/register", (req, res)=>{
     // console.log(req.body);
+    Credential.register({username : req.body.username}, req.body.password, (err, cred)=>{
+        if(err){
+            console.log(err);
+            res.redirect("/register");
+        } else {
+            passpost.authenticate("local")(req, res, ()=>{
+                res.redirect("/secret");
+            })
+        }
+    })
     
 });
 app.post("/login", (req, res)=>{
